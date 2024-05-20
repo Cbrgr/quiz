@@ -1,37 +1,18 @@
 import Avatar from "@/components/Avatar";
-import { useRouter } from "next/router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-export default function Home() {
-  const randomGameId = useMemo(() => Math.floor(Math.random() * 10000), []);
-  const [friendGameId, setFriendGameId] = useState<string>("");
+type Props = {
+  onSubmitUsername: (username: string) => void;
+};
+const InviteRoom = ({ onSubmitUsername }: Props) => {
   const [username, setUsername] = useState<string>("");
   const [isUsernameValid, setIsUsernameValid] = useState(false);
-
-  const router = useRouter();
 
   const handleUsernameChange = (event: any) => {
     const value = event.target.value;
     setIsUsernameValid(value.trim() !== "");
     setUsername(value);
     console.log(value);
-  };
-
-  const handleGameIdChange = (event: any) => {
-    const value = event.target.value;
-    setFriendGameId(value);
-    console.log(value);
-  };
-
-  const handleCreateGame = (): void => {
-    if (!isUsernameValid) return;
-    router.push(
-      {
-        pathname: `/game/${randomGameId}`,
-        query: { username: username.trim() }
-      },
-      `/game/${randomGameId}`
-    );
   };
 
   return (
@@ -51,27 +32,17 @@ export default function Home() {
             />
           </div>
         </div>
-        <div className="flex gap-5">
-          <div className="flex">
-            <input
-              type="text"
-              placeholder="Entrer un code"
-              value={friendGameId}
-              onChange={handleGameIdChange}
-            />
-            <a className="bg-blue-400 p-2 rounded-md" href={`/${friendGameId}`}>
-              OK
-            </a>
-          </div>
+        <div>
           <button
             disabled={!isUsernameValid}
             className="bg-blue-400 p-2 rounded-md"
-            onClick={handleCreateGame}
+            onClick={() => onSubmitUsername(username)}
           >
-            Créer une partie
+            Rejoindre la partie
           </button>
         </div>
       </div>
     </main>
   );
-}
+};
+export default InviteRoom;
