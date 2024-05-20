@@ -6,13 +6,13 @@ export default function Home() {
   const randomGameId = useMemo(() => Math.floor(Math.random() * 10000), [])
   const [friendGameId, setFriendGameId] = useState<string>("")
   const [username, setUsername] = useState<string>("")
-  const [isValid, setIsValid] = useState(false)
+  const [isUsernameValid, setIsUsernameValid] = useState(false)
 
   const router = useRouter()
 
   const handleUsernameChange = (event: any) => {
     const value = event.target.value
-    setIsValid(value.trim() !== "")
+    setIsUsernameValid(value.trim() !== "")
     setUsername(value)
     console.log(value)
   }
@@ -24,7 +24,7 @@ export default function Home() {
   }
 
   const handleCreateGame = (): void => {
-    if (!isValid) return
+    if (!isUsernameValid) return
     router.push(
       {
         pathname: `/game/${randomGameId}`,
@@ -41,7 +41,7 @@ export default function Home() {
         <div className="flex items-center gap-10">
           <Avatar />
           <div className="flex flex-col gap-5">
-            <p>Text d'introduction</p>
+            <p>Text introduction</p>
             <input
               type="text"
               name="username"
@@ -64,7 +64,7 @@ export default function Home() {
             </a>
           </div>
           <button
-            disabled={!isValid}
+            disabled={!isUsernameValid}
             className="bg-blue-400 p-2 rounded-md"
             onClick={handleCreateGame}
           >

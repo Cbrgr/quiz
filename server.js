@@ -17,7 +17,7 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     console.log("USER IS CONNECTED");
     socket.on("init_user", ({ gameId, username }) => {
-      // socket.username = username;
+      socket.username = username;
       console.log("gameId");
       console.log(gameId);
       socket.join(gameId);
@@ -25,8 +25,13 @@ app.prepare().then(() => {
       console.log("io.sockets.adapter.rooms.get(gameId)");
       console.log(io.sockets.adapter.rooms.get(gameId));
 
-      const playerList = Array.from(io.sockets.adapter.rooms.get(gameId));
-      io.to(gameId).emit("player_list", playerList);
+      const idsList = Array.from(io.sockets.adapter.rooms.get(gameId));
+      const playersArray = idsList.map(id => {
+        const socketData = io.sockets.sockets.get(id)
+        return{id, username: socketData.username}
+      })
+      console.log("playersList", playersArray)
+      io.to(gameId).emit("player_list", playersArray);
     });
     socket.on("disconnecting", () => {
       console.log("Player disconnecting");

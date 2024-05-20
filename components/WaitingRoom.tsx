@@ -30,7 +30,7 @@ const WaitingRoom = ({ players }: Props) => {
           <div className="flex flex-col gap-2">
             {players.map((p) => (
               <div className="text-center p-1 bg-blue-300" key={p.id}>
-                {p.label}
+                {p.username}
               </div>
             ))}
           </div>

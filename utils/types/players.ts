@@ -1,4 +1,4 @@
 export type PlayerType = {
-  id: string
-  label: string
-}
+  id: string;
+  username: string;
+};

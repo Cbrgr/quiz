@@ -23,14 +23,10 @@ export default function Game() {
     setMessages((prev) => [...prev, message]);
   };
 
-  const onPlayerList = (players: string[]) => {
+  const onPlayerList = (players: PlayerType[]) => {
     console.log("Player list refreshed");
-    console.log(players);
-    const formattedPlayers = players.map((player) => ({
-      id: player,
-      label: player
-    }));
-    setPlayerList(formattedPlayers);
+    console.log(players[0].username);
+    setPlayerList(players);
   };
 
   const onConnect = () => {
@@ -53,7 +49,7 @@ export default function Game() {
     if (router.isReady && socket.connected) {
       socket.emit("init_user", { gameId, username });
     }
-  }, [router, socket.connected]);
+  }, [router, socket.connected, gameId, username]);
 
   useEffect(() => {
     if (socket.connected) {
@@ -69,6 +65,7 @@ export default function Game() {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("room_message", onRoomMessage);
+      socket.on("player_list", onPlayerList);
     };
   }, []);
 
@@ -93,8 +90,8 @@ export default function Game() {
         <WaitingRoom players={playerList} />
         <div className="flex flex-col gap-1">
           <div className="bg-white grow">
-            {messages.map((m) => (
-              <div>{m}</div>
+            {messages.map((m, index) => (
+              <div key={index}>{m}</div>
             ))}
           </div>
           <div className="flex items-center">
