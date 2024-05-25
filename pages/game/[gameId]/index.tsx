@@ -49,13 +49,12 @@ export default function Game() {
   const handleUserInit = (name: string) => {
     setUsername(name);
     socket.emit("init_user", {
-      gameId: router.query.gameId,
+      roomId: router.query.gameId,
       username: name
     });
   };
 
   useEffect(() => {
-    console.log("router preparing --------------------------");
     if (router.isReady && socket.connected && router.query.username) {
       handleUserInit(`${router.query.username}`);
     }

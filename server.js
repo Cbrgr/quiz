@@ -11,6 +11,15 @@ const handler = app.getRequestHandler();
 
 const rooms = new Map();
 
+const getPlayerList = (io, roomId) => {
+  const idsList = Array.from(io.sockets.adapter.rooms.get(roomId));
+  const playerList = idsList.map((id) => {
+    const { username } = io.sockets.sockets.get(id);
+    return { id, username };
+  });
+  return playerList;
+};
+
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
@@ -18,86 +27,47 @@ app.prepare().then(() => {
 
   io.on("connection", (socket) => {
     console.log("USER IS CONNECTED ----------");
-    socket.on("init_user", ({ gameId, username }) => {
-      console.log("INIT USER ----------");
+    socket.on("init_user", ({ roomId, username }) => {
       socket.username = username;
-      console.log("gameId");
-      console.log(gameId);
 
-      if (rooms.has(gameId)) {
-        const users = rooms.get(gameId);
+      if (rooms.has(roomId)) {
+        const users = rooms.get(roomId);
         users.set(socket.id, { username: username });
-        rooms.set(gameId, users);
-        console.log("HAS ROOM");
-        console.log("users", users);
+        rooms.set(roomId, users);
       } else {
         const users = new Map();
         users.set(socket.id, { username: username });
-        rooms.set(gameId, users);
-        console.log("DOES NOT HAVE ROOM");
-        console.log("users", users);
+        rooms.set(roomId, users);
       }
-      console.log("ROOM MAP");
-      console.log(rooms);
 
-      socket.join(gameId);
+      socket.join(roomId);
 
-      console.log("io.sockets.adapter.rooms.get(gameId)");
-      console.log(io.sockets.adapter.rooms.get(gameId));
-
-      const idsList = Array.from(io.sockets.adapter.rooms.get(gameId));
-      const playersArray = idsList.map((id) => {
-        const socketData = io.sockets.sockets.get(id);
-        return { id, username: socketData.username };
-      });
-      console.log("playersList", playersArray);
-      io.to(gameId).emit("player_list", playersArray);
+      const playerList = getPlayerList(io, roomId);
+      io.to(roomId).emit("player_list", playerList);
     });
     socket.on("disconnecting", () => {
-      console.log("Player disconnecting");
-      console.log(socket.rooms); // the Set contains at least the socket ID
-      // const rooms = Array.from(socket.rooms).slice(1);
-      // console.log("rooms list");
-      // console.log(rooms);
-      // rooms.forEach((roomId) => {
-      //   console.log("roomId");
-      //   console.log(roomId);
-      //   const playerList = Array.from(io.sockets.adapter.rooms.get(roomId));
-      //   console.log("playerList");
-      //   console.log(playerList);
-      //   io.to(roomId).emit("player_list", playerList);
-      // });
-      console.log(socket.id);
-      console.log(socket.username);
       const playerRooms = Array.from(socket.rooms);
+
       playerRooms.forEach((roomId) => {
-        console.log("roomId", roomId);
         if (rooms.has(roomId)) {
-          console.log("rooms", rooms);
           const users = rooms.get(roomId);
           users.delete(socket.id);
           if (users.size == 0) {
             rooms.delete(roomId);
           } else {
             rooms.set(roomId, users);
+            const playerList = getPlayerList(io, roomId).filter(
+              ({ id }) => id !== socket.id
+            );
+            io.to(roomId).emit("player_list", playerList);
           }
-          console.log("DELETE USER");
-          console.log("users", users);
-          console.log("rooms", rooms);
         }
       });
     });
     socket.on("disconnect", () => {
       console.log("Player disconnected");
-      console.log(socket.rooms);
-      console.log(socket.id);
-      console.log(socket.username);
     });
     socket.on("room_message", (message) => {
-      console.log("ROOM MESSAGE");
-      console.log(message);
-      console.log(message.room);
-      // io.emit("room_message", message.text);
       io.to(message.room).emit("room_message", message.text);
     });
   });

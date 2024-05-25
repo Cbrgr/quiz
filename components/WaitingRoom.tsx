@@ -1,9 +1,10 @@
-import { PlayerType } from "@/utils/types/players"
-import { useState } from "react"
+import { socket } from "@/socket";
+import { PlayerType } from "@/utils/types/players";
+import { useState } from "react";
 
 type Props = {
-  players: PlayerType[]
-}
+  players: PlayerType[];
+};
 
 const WaitingRoom = ({ players }: Props) => {
   const gameModes = [
@@ -12,15 +13,15 @@ const WaitingRoom = ({ players }: Props) => {
     { id: 3, label: "Partie QCM" },
     { id: 4, label: "Partie lol" },
     { id: 5, label: "Partie bla" }
-  ]
+  ];
 
   const [selectedGameMode, setSelectedGameMode] = useState<number>(
     gameModes[0].id
-  )
+  );
 
   const handleGameModeClick = (gameModeId: number) => {
-    setSelectedGameMode(gameModeId)
-  }
+    setSelectedGameMode(gameModeId);
+  };
 
   return (
     <div className="flex flex-col items-center gap-20">
@@ -28,9 +29,16 @@ const WaitingRoom = ({ players }: Props) => {
       <div className="flex gap-20">
         <div className="flex flex-col justify-between">
           <div className="flex flex-col gap-2">
-            {players.map((p) => (
-              <div className="text-center p-1 bg-blue-300" key={p.id}>
-                {p.username}
+            {players.map((player) => (
+              <div
+                className={`text-center p-1 bg-blue-300 border-2 ${
+                  socket.id === player.id
+                    ? "border-black"
+                    : "border-transparent"
+                }`}
+                key={player.id}
+              >
+                {player.username}
               </div>
             ))}
           </div>
@@ -40,7 +48,7 @@ const WaitingRoom = ({ players }: Props) => {
         <div className="flex flex-col gap-10">
           <div className="grid grid-cols-3 gap-5">
             {gameModes.map((m) => {
-              const isSelected = selectedGameMode === m.id
+              const isSelected = selectedGameMode === m.id;
               return (
                 <div
                   key={m.id}
@@ -51,7 +59,7 @@ const WaitingRoom = ({ players }: Props) => {
                 >
                   {m.label}
                 </div>
-              )
+              );
             })}
           </div>
           <div className="flex gap-5 justify-center items-center">
@@ -61,7 +69,7 @@ const WaitingRoom = ({ players }: Props) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WaitingRoom
+export default WaitingRoom;
