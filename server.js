@@ -70,6 +70,25 @@ app.prepare().then(() => {
     socket.on("room_message", (message) => {
       io.to(message.room).emit("room_message", message.text);
     });
+    socket.on("start_game", ({ gameMode, roomId }) => {
+      console.log("start_game");
+      console.log(gameMode);
+      console.log(roomId);
+      const playerList = getPlayerList(io, roomId);
+      io.to(roomId).emit("start_game", { gameMode, playerList });
+
+      setTimeout(() => {
+        console.log("question");
+        io.to(roomId).emit("question", {
+          id: 100,
+          total_questions: 10,
+          current_question: 1,
+          timer: 10,
+          title: "Ma question ?",
+          answers: ["Pierre", "Paul", "Jacques", "Louis"]
+        });
+      }, 3500);
+    });
   });
 
   httpServer

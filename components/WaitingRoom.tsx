@@ -1,27 +1,29 @@
-import { socket } from "@/socket";
-import { PlayerType } from "@/utils/types/players";
-import { useState } from "react";
+import { socket } from '@/socket'
+import { UserType } from '@/utils/types/users'
+import { useState } from 'react'
 
 type Props = {
-  players: PlayerType[];
-};
+  users: UserType[]
+  roomId?: string
+}
 
-const WaitingRoom = ({ players }: Props) => {
+const WaitingRoom = ({ users, roomId }: Props) => {
   const gameModes = [
-    { id: 1, label: "Partie classique" },
-    { id: 2, label: "Partie rapide" },
-    { id: 3, label: "Partie QCM" },
-    { id: 4, label: "Partie lol" },
-    { id: 5, label: "Partie bla" }
-  ];
+    { label: 'qcm', title: 'Partie QCM' },
+    { label: 'classic', title: 'Partie classique' },
+    { label: 'fast', title: 'Partie rapide' },
+    { label: 'lol', title: 'Partie lol' },
+    { label: 'bla', title: 'Partie bla' },
+  ]
 
-  const [selectedGameMode, setSelectedGameMode] = useState<number>(
-    gameModes[0].id
-  );
+  const [selectedGameMode, setSelectedGameMode] = useState<string>(
+    gameModes[0].label
+  )
 
-  const handleGameModeClick = (gameModeId: number) => {
-    setSelectedGameMode(gameModeId);
-  };
+  const handleStartGame = () => {
+    console.log('handleStartGame')
+    socket.emit('start_game', { gameMode: selectedGameMode, roomId })
+  }
 
   return (
     <div className="flex flex-col items-center gap-20">
@@ -29,16 +31,14 @@ const WaitingRoom = ({ players }: Props) => {
       <div className="flex gap-20">
         <div className="flex flex-col justify-between">
           <div className="flex flex-col gap-2">
-            {players.map((player) => (
+            {users.map((user) => (
               <div
                 className={`text-center p-1 bg-blue-300 border-2 ${
-                  socket.id === player.id
-                    ? "border-black"
-                    : "border-transparent"
+                  socket.id === user.id ? 'border-black' : 'border-transparent'
                 }`}
-                key={player.id}
+                key={user.id}
               >
-                {player.username}
+                {user.username}
               </div>
             ))}
           </div>
@@ -48,28 +48,36 @@ const WaitingRoom = ({ players }: Props) => {
         <div className="flex flex-col gap-10">
           <div className="grid grid-cols-3 gap-5">
             {gameModes.map((m) => {
-              const isSelected = selectedGameMode === m.id;
+              const isSelected = selectedGameMode === m.label
               return (
                 <div
-                  key={m.id}
+                  key={m.label}
                   className={`h-[100px] p-2 bg-cyan-500 flex items-center justify-center border-4 cursor-pointer ${
-                    isSelected ? "border-red-500 bg-white" : ""
+                    isSelected ? 'border-red-500 bg-white' : ''
                   }`}
-                  onClick={() => handleGameModeClick(m.id)}
+                  onClick={() => setSelectedGameMode(m.label)}
                 >
-                  {m.label}
+                  {m.title}
                 </div>
-              );
+              )
             })}
           </div>
           <div className="flex gap-5 justify-center items-center">
-            <button className="bg-blue-500 p-2">Inviter</button>
-            <button className="bg-blue-500 p-2">Démarrer</button>
+            <button type="button" className="bg-blue-500 p-2">
+              Inviter
+            </button>
+            <button
+              type="button"
+              className="bg-blue-500 p-2"
+              onClick={handleStartGame}
+            >
+              Démarrer
+            </button>
           </div>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default WaitingRoom;
+export default WaitingRoom
